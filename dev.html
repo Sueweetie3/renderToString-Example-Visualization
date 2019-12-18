@@ -1,0 +1,363 @@
+<html>
+
+<body>
+  <script src="../../../build/node_modules/react/umd/react.development.js"></script>
+  <script src="../../../build/node_modules/react-dom/umd/react-dom.development.js"></script>
+  <script src="../../../build/node_modules/react-dom/umd/react-dom-server.browser.development.js"></script>
+  <script src="https://unpkg.com/babel-standalone@6/babel.js"></script>
+  <style>
+    .item-to-do {
+      text-decoration-line: none;
+    }
+
+    .item-done {
+      text-decoration-line: line-through;
+    }
+  </style>
+  <script type="text/babel">
+    // threadID: 2
+    const Sample = () => (<div>{ReactDOMServer.renderToString(<img src='./rabbit.png' />)}</div>);
+    // Uncaught Invariant Violation: ReactDOMServer does not yet support Suspense.
+    const Suspense = () => {
+      return <React.Suspense fallback={'Loading'}><Sample /></React.Suspense>
+    }
+    // threadID: 1
+    console.log(ReactDOMServer.renderToStaticMarkup((<div>
+      <Sample />
+    </div>)));
+  </script>
+  <!-- <script type="text/babel">
+  class ApiCall extends React.Component{
+    constructor(){
+      super();
+      this.state = {data: null};
+      this.fetchData = this.fetchData.bind(this);
+    }
+    fetchData(){
+      return new Promise((resolve)=>{
+        setTimeout(() => {
+          resolve({name: 'Tilibo', job: 'Programmer'})
+        }, 100);
+      })
+    };
+    //WARNING! To be deprecated in React v17. Use componentDidMount instead.
+    componentWillMount() {
+      this.setState({data: {name: 'Tilibo'}})
+      //this.fetchData().then((data)=>{this.setState({data})})
+    }
+  
+    render() {
+      const { data } = this.state; 
+      if(data){
+        return <div>{data.name}</div>
+      }else{
+        return <div>Loading</div>
+      }
+    }
+  }
+  ReactDOM.render(
+    <ApiCall />,
+    document.getElementById('container')
+  );
+  console.log(ReactDOMServer.renderToString(<ApiCall />));
+  </script>
+  
+  <script type="text/babel">
+  function init(initialCount) {
+    return {count: initialCount};
+  }
+
+  function reducer(state, action) {
+    switch (action.type) {
+      case 'increment':
+        return {count: state.count + 1};
+      case 'decrement':
+        return {count: state.count - 1};
+      case 'reset':
+        return init(action.payload);
+      default:
+        throw new Error();
+    }
+  }
+
+  function Counter({initialCount}) {
+    const [state, dispatch] = React.useReducer(reducer, initialCount, init);
+    return (
+      <div>
+        Count: {state.count}
+        <button
+          onClick={() => dispatch({type: 'reset', payload: initialCount})}>
+
+          Reset
+        </button>
+        <button onClick={() => dispatch({type: 'decrement'})}>-</button>
+        <button onClick={() => dispatch({type: 'increment'})}>+</button>
+      </div>
+    );
+  }
+  const ThemeContext = React.createContext('dark');
+  function TextInputWithFocusButton() {
+    const inputEl = React.useRef(null);
+    const onButtonClick = () => {
+      // `current` points to the mounted text input element
+      inputEl.current.focus();
+    };
+    const contextText = React.useContext(ThemeContext);
+    const buttonText = React.useMemo(()=>{return contextText === 'dark' ? 'darkOne' : 'lightOne'}, [contextText]);
+    return (
+      <ThemeContext.Provider>
+        <input ref={inputEl} type="text" />
+        <button onClick={onButtonClick}>{buttonText}</button>
+        <Counter initialCount={0} />
+      </ThemeContext.Provider>
+    );
+  }
+
+  ReactDOM.render(
+    <TextInputWithFocusButton />,
+    document.getElementById('container')
+  );
+  console.log(ReactDOMServer.renderToString(<TextInputWithFocusButton />));
+  </script>
+  <script type="text/babel">
+  const themes = {
+    light: {
+      foreground: '#000000',
+      background: '#eeeeee',
+    },
+    dark: {
+      foreground: '#ffffff',
+      background: '#222222',
+    },
+  };
+
+  const inputStyles = {
+    primary: {
+      foreground: '#f53d2d',
+    }
+  }
+  
+  const ThemeContext = React.createContext();
+  const InputContext = React.createContext();
+
+  class App extends React.Component {
+    render() {
+      return (
+        <ThemeContext.Provider value={themes.light}>
+          <Toolbar />
+        </ThemeContext.Provider>
+      );
+    }
+  }
+
+  class Toolbar extends React.Component {
+    render(){
+      return (
+        <div>
+          <InputContext.Provider value={inputStyles.primary}>
+            <StyleInput />
+          </InputContext.Provider>
+          <ThemedButton />
+        </div>
+      );
+    }
+  }
+  class StyleInput extends React.Component {
+    static contextType = InputContext;
+    constructor(props){
+      super(props);
+      this.myRef = React.createRef();
+    }
+    componentDidMount() {
+      this.myRef.current.value = 'Hahaha';
+    }
+    
+    render(){
+      return <input style={{borderColor: this.context.foreground}} ref={this.myRef} />;
+    }
+  }
+  class ThemedButton extends React.Component {
+    static contextType = ThemeContext;
+    render() {
+      return (
+        <React.Fragment>
+          <button style={{backgroundColor: this.context.background}}>Focus</button>
+          <svg height="16" viewBox="0 0 64 64" width="16" xmlns="http://www.w3.org/2000/svg">
+              <path d="m52 6h-40a6 6 0 0 0 -6 6v40a6 6 0 0 0 6 6h40a6 6 0 0 0 6-6v-40a6 6 0 0 0 -6-6zm-3.74 38.02-4.24 4.24-12.02-12.02-12.02 12.02-4.24-4.24 12.02-12.02-12.02-12.02 4.24-4.24 12.02 12.02 12.02-12.02 4.24 4.24-12.02 12.02z" fill="#57a4ff" />
+              <path d="m52 6h-40a6 6 0 0 0 -6 6v40a6 6 0 0 0 6 6h40a6 6 0 0 0 6-6v-40a6 6 0 0 0 -6-6zm-3.74 38.02-4.24 4.24-12.02-12.02-12.02 12.02-4.24-4.24 12.02-12.02-12.02-12.02 4.24-4.24 12.02 12.02 12.02-12.02 4.24 4.24-12.02 12.02z" fill="#57a4ff" />
+              <g fill="#004fac" fillRule="evenodd">
+                  <path d="m54 1h-44a9.01 9.01 0 0 0 -9 9v44a9.01 9.01 0 0 0 9 9h44a9.01 9.01 0 0 0 9-9v-44a9.01 9.01 0 0 0 -9-9zm7 53a7.008 7.008 0 0 1 -7 7h-44a7.008 7.008 0 0 1 -7-7v-44a7.008 7.008 0 0 1 7-7h44a7.008 7.008 0 0 1 7 7z" />
+                  <path d="m52 5h-40a7.008 7.008 0 0 0 -7 7v40a7.008 7.008 0 0 0 7 7h40a7.008 7.008 0 0 0 7-7v-40a7.008 7.008 0 0 0 -7-7zm5 47a5.006 5.006 0 0 1 -5 5h-40a5.006 5.006 0 0 1 -5-5v-40a5.006 5.006 0 0 1 5-5h40a5.006 5.006 0 0 1 5 5z" />
+                  <path d="m48.971 19.272-4.243-4.243a1 1 0 0 0 -1.414 0l-11.314 11.315-11.314-11.315a1.029 1.029 0 0 0 -1.414 0l-4.243 4.243a1 1 0 0 0 0 1.415l11.314 11.313-11.314 11.313a1 1 0 0 0 0 1.415l4.243 4.243a1 1 0 0 0 1.414 0l11.314-11.315 11.314 11.315a1 1 0 0 0 1.414 0l4.243-4.243a1 1 0 0 0 0-1.415l-11.314-11.313 11.314-11.313a1 1 0 0 0 0-1.415zm-13.435 12.021a1 1 0 0 0 0 1.414l11.314 11.314-2.829 2.829-11.314-11.315a1 1 0 0 0 -1.414 0l-11.314 11.315-2.829-2.829 11.314-11.314a1 1 0 0 0 0-1.414l-11.314-11.314 2.829-2.829 11.314 11.315a1.029 1.029 0 0 0 1.414 0l11.314-11.315 2.829 2.829z" />
+              </g>
+          </svg>
+        </React.Fragment>
+      );}
+  }
+
+  ReactDOM.render(
+    <App />,
+    document.getElementById('container')
+  );
+  console.log(ReactDOMServer.renderToString(<App />));
+  </script>
+  <script type="text/babel">
+    const TodoItemWrapper = (props) => {
+      const [itemClassName, setItemClassName] = React.useState('item-to-do');
+      const checkItem = React.useCallback(
+        () => {
+          console.log('checkItem');
+          if(itemClassName === "item-to-do")
+          {setItemClassName('item-done');}
+          else 
+          {setItemClassName('item-to-do');}
+        },
+        [itemClassName, setItemClassName],
+      );
+      React.useEffect(()=>{
+        props.item.content += '---Tilibo';
+        console.log('After component mount');
+      }, []);
+      return <TodoItem {...props} checkItem={checkItem} itemClassName={itemClassName} /> ;
+    }
+    const TodoItem = ({item, checkItem, handleDeleteItem, itemClassName}) => {
+      return (<li>
+          <input type="checkbox" name="todoitem" value={item.content} onClick={checkItem} />
+          <span className={itemClassName}>{item.title + ': ' + item.content + ' '}</span>
+          <button value="delete" onClick={()=>handleDeleteItem(item.id)} style={{padding: 0, margin: 0}} >
+              <svg height="16" viewBox="0 0 64 64" width="16" xmlns="http://www.w3.org/2000/svg">
+                  <path d="m52 6h-40a6 6 0 0 0 -6 6v40a6 6 0 0 0 6 6h40a6 6 0 0 0 6-6v-40a6 6 0 0 0 -6-6zm-3.74 38.02-4.24 4.24-12.02-12.02-12.02 12.02-4.24-4.24 12.02-12.02-12.02-12.02 4.24-4.24 12.02 12.02 12.02-12.02 4.24 4.24-12.02 12.02z" fill="#57a4ff" />
+                  <path d="m52 6h-40a6 6 0 0 0 -6 6v40a6 6 0 0 0 6 6h40a6 6 0 0 0 6-6v-40a6 6 0 0 0 -6-6zm-3.74 38.02-4.24 4.24-12.02-12.02-12.02 12.02-4.24-4.24 12.02-12.02-12.02-12.02 4.24-4.24 12.02 12.02 12.02-12.02 4.24 4.24-12.02 12.02z" fill="#57a4ff" />
+                  <g fill="#004fac" fillRule="evenodd">
+                      <path d="m54 1h-44a9.01 9.01 0 0 0 -9 9v44a9.01 9.01 0 0 0 9 9h44a9.01 9.01 0 0 0 9-9v-44a9.01 9.01 0 0 0 -9-9zm7 53a7.008 7.008 0 0 1 -7 7h-44a7.008 7.008 0 0 1 -7-7v-44a7.008 7.008 0 0 1 7-7h44a7.008 7.008 0 0 1 7 7z" />
+                      <path d="m52 5h-40a7.008 7.008 0 0 0 -7 7v40a7.008 7.008 0 0 0 7 7h40a7.008 7.008 0 0 0 7-7v-40a7.008 7.008 0 0 0 -7-7zm5 47a5.006 5.006 0 0 1 -5 5h-40a5.006 5.006 0 0 1 -5-5v-40a5.006 5.006 0 0 1 5-5h40a5.006 5.006 0 0 1 5 5z" />
+                      <path d="m48.971 19.272-4.243-4.243a1 1 0 0 0 -1.414 0l-11.314 11.315-11.314-11.315a1.029 1.029 0 0 0 -1.414 0l-4.243 4.243a1 1 0 0 0 0 1.415l11.314 11.313-11.314 11.313a1 1 0 0 0 0 1.415l4.243 4.243a1 1 0 0 0 1.414 0l11.314-11.315 11.314 11.315a1 1 0 0 0 1.414 0l4.243-4.243a1 1 0 0 0 0-1.415l-11.314-11.313 11.314-11.313a1 1 0 0 0 0-1.415zm-13.435 12.021a1 1 0 0 0 0 1.414l11.314 11.314-2.829 2.829-11.314-11.315a1 1 0 0 0 -1.414 0l-11.314 11.315-2.829-2.829 11.314-11.314a1 1 0 0 0 0-1.414l-11.314-11.314 2.829-2.829 11.314 11.315a1.029 1.029 0 0 0 1.414 0l11.314-11.315 2.829 2.829z" />
+                  </g>
+              </svg>
+          </button>
+        </li>)
+    }
+    const TodoOptions = () => {
+      return (
+        <select name="categoray" value="saab" data-alt="ddddd" customecolor="red">
+          <option value="volvo" selected>Volvo</option>
+          <option value="saab" disabled={true}>Saab</option>
+          <option value="opel">Opel</option>
+          <option value="audi">Audi</option>
+        </select>)
+    }
+    const TodoInput = () => (
+        <div>
+          <div style={{display: "flex", margin: "10px 0"}}>
+            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAAAbUlEQVRIie2S0QmAMAxEXzuDTuI21fXEKQRX6ETtT8ESFKSkICUPAgeBu9IcGA3MwAUsPcwnIAIJOLXNUzWxhD3tvs5rgDRXCxgHa5G16Ge4SnsgFL3T4R837gOtYtd8ZK/9SokTOpT0A6vaMGQPMF1VCeZoEgAAAABJRU5ErkJggg==" />
+            <input type="text" name="title" autoFocus={true} required />
+          </div>
+          <textarea rows="4" cols="50" maxLength={30} style={{display: "block"}} name="content"></textarea>
+        </div>
+      )
+    const TodoForm = ({addTodoItem}) => {
+      const handleSubmit = (e) => {
+          e.preventDefault();
+          const todoForm = document.forms[0];
+          addTodoItem({
+            categoray: todoForm.categoray.value,
+            title: todoForm.title.value,
+            content: todoForm.content.value,
+            id: Math.random().toString(32).slice(2,8)
+          })
+      }
+      return (
+        <form>
+          <TodoOptions />
+          <TodoInput />
+          <input type="submit" value="Submit" onClick={handleSubmit}/>
+        </form>
+      )
+    }
+    const DraggableRabbit = () => (
+        <div>
+          <img draggable={true} alt="Logo" height="60px" width="60px" src="https://img.icons8.com/flat_round/64/000000/rabbit--v2.png" />
+          <a href="./rabbit.png" download>
+            Download the rabbit
+          </a>
+        </div>
+    );
+    const TodoPage = () => {
+      const [todoItems, setTodoItems] = React.useState([{category: "animal", title:"Feed", content: "Feed rabbit 7 pm", id: '2vd32d'}]);
+      const handleDeleteItem = React.useCallback(
+        (id) => {
+          setTodoItems(todoItems.filter((item) => {
+            return item.id !== id;
+          }));
+        },
+        [todoItems, setTodoItems],
+      )
+      const addTodoItem = React.useCallback(
+        (newItem) => {
+          setTodoItems([...todoItems, newItem])
+        },
+        [todoItems, setTodoItems],
+      )
+      return (
+        <div style={{"backgroundColor": "lightblue", width: "600px", margin: "auto", padding: "12px 20px"}}>
+          <DraggableRabbit /> 
+          <TodoForm addTodoItem={addTodoItem} />
+          <ol type="i">
+            {todoItems.map((todoItem)=><TodoItemWrapper handleDeleteItem={handleDeleteItem} item={todoItem} key={todoItem.id} />)}
+          </ol>
+        </div>
+      )
+    }
+    ReactDOM.render(
+      <TodoPage />,
+      document.getElementById('container')
+    );
+    console.log(ReactDOMServer.renderToString(<TodoPage />));
+  </script>
+  <script type="text/babel">
+      const ItemView = ({item}) => {
+        return (<li>{item.name}<span className="priceLabel"> Price:</span>{item.price}</li>)
+      }
+      /*class ItemListContainer extends React.Component {
+      }*/
+      class ItemList extends React.Component {
+        state = {
+          title: "ItemList"
+        }
+        static getDerivedStateFromProps(props, state){
+          return({title: props.title})
+        }
+        /*componentWillMount() {
+          this.setState({
+            title: "Tilibo Shop ItemList"
+          })
+        }*/
+        
+        render(){
+          const items = this.props.items;
+          const title = this.state.title;
+          return (
+            <React.Fragment>
+              <h2>{title}</h2>
+              <ul>{items.map((item, index)=>{
+                return (<ItemView key={index} item={item} />)
+              })}</ul>
+              <input type="text" placeholder="Search item" />
+            </React.Fragment>
+          )
+        }
+      }
+      const itemsMap = [
+        {name: 'Apple', price: '$1.2'},
+        {name: 'Banana', price: '$0.6'},
+        {name: 'Carrot', price: '$0.2'},
+      ];
+      ReactDOM.render(
+        <ItemList items={itemsMap} title={"Tilibo Shop ItemList"}/>,
+        document.getElementById('container')
+      );
+      console.log(ReactDOMServer.renderToString(<ItemList items={itemsMap}  title={"Tilibo Shop ItemList"}/>));
+    </script>-->
+</body>
+
+</html>
